@@ -15,3 +15,6 @@ provisions vm with:
 
 
 assumes that ebs volume is attached at /dev/sdh or /dev/xvdh
+
+
+bootstrap.sh is in terraform template language
