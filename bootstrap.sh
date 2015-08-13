@@ -17,11 +17,9 @@ function module()
 readonly IS_SALTMASTER=${is_saltmaster:-no}
 readonly HAS_DATA_STORAGE=${has_data_storage:-no}
 readonly OPG_ROLE=${opg_role:-default}
-readonly OPG_STACK=${opg_stack:-develop}
-readonly OPG_STACKID=${opg_stackid:-develop01}
 
-readonly DOCKER_COMPOSE_VERSION=1.4
-readonly SALT_VERSION=2015.5.3
+readonly DOCKER_COMPOSE_VERSION=${docker_compose_version}
+readonly SALT_VERSION=${salt_version}
 
 module modules/00-start.sh
 module modules/10-volumes.sh
