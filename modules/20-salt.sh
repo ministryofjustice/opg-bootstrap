@@ -34,3 +34,8 @@ state_output: changes
 EOF
     start salt-master
 fi
+
+# Usually it's safe to run Salt during the first-boot
+# stage.  Primarily benefits nodes in the Amazon Auto
+# Scaling Group.
+salt-call -l debug state.highstate || true
