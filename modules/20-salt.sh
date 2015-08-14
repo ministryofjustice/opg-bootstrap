@@ -12,15 +12,6 @@ apt-get -y --force-yes install python-pip
 pip install pyzmq m2crypto pycrypto gitpython psutil boto boto3
 pip install salt==${SALT_VERSION}
 
-curl -o /etc/init/salt-minion.conf https://raw.githubusercontent.com/saltstack/salt/develop/pkg/salt-minion.upstart
-mkdir -p /etc/salt
-touch /etc/salt/minion
-cat <<EOF >> /etc/salt/grains
-opg-role: ${OPG_ROLE}
-EOF
-
-start salt-minion
-
 if [  "${IS_SALTMASTER}" == "yes" ]; then
     curl -o /etc/init/salt-master.conf https://raw.githubusercontent.com/saltstack/salt/develop/pkg/salt-master.upstart
     cat <<EOF >> /etc/salt/master
@@ -34,6 +25,15 @@ state_output: changes
 EOF
     start salt-master
 fi
+
+curl -o /etc/init/salt-minion.conf https://raw.githubusercontent.com/saltstack/salt/develop/pkg/salt-minion.upstart
+mkdir -p /etc/salt
+touch /etc/salt/minion
+cat <<EOF >> /etc/salt/grains
+opg-role: ${OPG_ROLE}
+EOF
+
+start salt-minion
 
 # Usually it's safe to run Salt during the first-boot
 # stage.  Primarily benefits nodes in the Amazon Auto
