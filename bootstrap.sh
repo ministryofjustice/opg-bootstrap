@@ -8,7 +8,7 @@ function module()
     if [ ! -e $${module_path} ]; then
         echo $${module_path}: Downloading
         mkdir -p modules
-        curl -so $${module_path} https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/$${module_path}
+        wget --no-verbose --retry-connrefused --random-wait -O $${module_path} https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/$${module_path}
     fi
     echo $${module_path}: Loading
     source $${module_path}
@@ -20,6 +20,7 @@ readonly OPG_ROLE=${opg_role}
 
 readonly DOCKER_COMPOSE_VERSION=${docker_compose_version}
 readonly SALT_VERSION=${salt_version}
+
 
 module modules/00-start.sh
 module modules/10-volumes.sh
