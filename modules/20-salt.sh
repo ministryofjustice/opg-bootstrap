@@ -13,7 +13,10 @@ pip install pyzmq m2crypto pycrypto gitpython psutil boto boto3
 pip install salt==${SALT_VERSION}
 
 mkdir -p /etc/salt
-touch /etc/salt/minion
+cat <<EOF >> /etc/salt/minion
+log_level: warning
+log_level_logfile: all
+EOF
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
     curl -o /etc/init/salt-master.conf https://raw.githubusercontent.com/saltstack/salt/develop/pkg/salt-master.upstart

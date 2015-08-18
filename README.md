@@ -9,8 +9,8 @@ Provisions VM with:
 - docker
 
 Setups filesystem:
-- /srv (btrfs: as raid0 of all available ephemeral volumes)
-- /data (ext4: as attached ebs volume, but only if available)
+- /srv (btrfs: as raid0 of all available ephemeral volumes - only if available)
+- /data (ext4: as attached ebs volume - only if available)
 
 
 configuration
