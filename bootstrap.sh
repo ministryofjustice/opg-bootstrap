@@ -24,6 +24,6 @@ readonly SALT_VERSION=${salt_version}
 
 module modules/00-start.sh
 module modules/10-volumes.sh
-module modules/20-salt.sh
-module modules/30-docker.sh
+module modules/20-docker.sh
+module modules/90-salt.sh
 module modules/99-end.sh
