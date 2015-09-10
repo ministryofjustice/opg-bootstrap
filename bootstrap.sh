@@ -31,6 +31,7 @@ readonly OPG_ROLE=${opg_role}
 
 readonly DOCKER_COMPOSE_VERSION=${docker_compose_version}
 readonly SALT_VERSION=${salt_version}
+readonly OPG_STACK=${opg_stack}
 
 module modules/00-start.sh
 module modules/10-volumes.sh
