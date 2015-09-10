@@ -89,6 +89,7 @@ EOF
 cat <<EOF >> /etc/salt/grains
 opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACK}
+opg_project: lpa
 EOF
 
 start salt-minion
