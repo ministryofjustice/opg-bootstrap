@@ -92,8 +92,8 @@ opg_stackname: ${OPG_STACK}
 opg_project: lpa
 EOF
 
+rm -f /etc/salt/pki/minion/minion_master.pub
 start salt-minion
-
 # Usually it's safe to run Salt during the first-boot
 # stage.  Primarily benefits nodes in the Amazon Auto
 # Scaling Group.
