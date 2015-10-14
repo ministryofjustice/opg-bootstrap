@@ -5,11 +5,11 @@ echo Installing salt
 apt-get -y --force-yes install build-essential pkg-config swig
 apt-get -y --force-yes install libyaml-0-2 libgmp10
 apt-get -y --force-yes install python-dev libyaml-dev libgmp-dev libssl-dev
-apt-get -y --force-yes install libzmq3 libzmq3-dev
+apt-get -y --force-yes install libzmq3 libzmq3-dev python-m2crypto
 apt-get -y --force-yes install procps pciutils
 apt-get -y --force-yes install python-pip
 
-pip install pyzmq m2crypto pycrypto gitpython psutil boto boto3
+pip install pyzmq pycrypto gitpython psutil boto boto3
 pip install salt==${SALT_VERSION}
 
 mkdir -p /etc/salt
