@@ -81,5 +81,5 @@ service rsyslog restart
 ### AWS
 echo Install few packages
 # install shared tools
-apt-get -y --force-yes install joe git awscli
 apt-get -y --force-yes update
+apt-get -y --force-yes install joe git awscli dpkg-dev
