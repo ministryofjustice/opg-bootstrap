@@ -80,6 +80,12 @@ script
 
   exec salt-minion
 end script
+
+# Starting highstate on 1st start and on each reboot
+post-start script
+  salt-call -l debug state.highstate
+end script
+
 EOF
 
 # salt-minon configuration
@@ -94,8 +100,3 @@ opg-role: ${OPG_ROLE}
 EOF
 
 start salt-minion
-
-# Usually it's safe to run Salt during the first-boot
-# stage.  Primarily benefits nodes in the Amazon Auto
-# Scaling Group.
-salt-call -l debug state.highstate || true
