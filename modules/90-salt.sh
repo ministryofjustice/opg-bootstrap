@@ -74,6 +74,9 @@ script
 
   # Activate the virtualenv if defined
   [ -f $SALT_USE_VIRTUALENV/bin/activate ] && . $SALT_USE_VIRTUALENV/bin/activate
+  
+  # Force minion to rebuild key on each boot so that after salt-master failure all we need is to reboot VMs one by one
+  rm -Rf /etc/salt/pki/minion
 
   exec salt-minion
 end script
