@@ -7,7 +7,7 @@ function download()
     #try downloading a file for 5 mins
     local module_path=$${1}
     local retry_count_down=30
-    while ! wget --no-verbose --retry-connrefused --random-wait -O $${module_path} https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/$${module_path} && [ $${retry_count_down} -gt 0 ] ; do
+    while ! wget --no-verbose --retry-connrefused --random-wait -O $${module_path} https://raw.githubusercontent.com/einyx/opg-bootstrap/master/$${module_path} && [ $${retry_count_down} -gt 0 ] ; do
         retry_count_down=$((retry_count_down - 1))
         sleep 10
     done
@@ -19,7 +19,7 @@ function module()
     if [ ! -e $${module_path} ]; then
         echo $${module_path}: Downloading
         mkdir -p modules
-        wget --no-verbose --retry-connrefused --random-wait -O $${module_path} https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/$${module_path}
+        wget --no-verbose --retry-connrefused --random-wait -O $${module_path} https://raw.githubusercontent.com/einyx/opg-bootstrap/master/$${module_path}
     fi
     echo $${module_path}: Loading
     source $${module_path}
