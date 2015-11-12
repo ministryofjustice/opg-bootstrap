@@ -65,8 +65,9 @@ fi
 echo Updating hostname
 # domain name and resolv.conf ar managed through dhcp
 IP=$(curl -s ${EC2_METADATA_URL}/local-ipv4)
+AZ=$(ec2metadata --availability-zone | awk -F "-" '{print $3}')
 AWS_HOSTNAME=`hostname`
-HOSTNAME="${OPG_ROLE}-${AWS_HOSTNAME}"
+HOSTNAME="${OPG_ROLE}-${AWS_HOSTNAME}-${AZ}"
 
 echo "${IP} ${HOSTNAME} ${OPG_ROLE} ${AWS_HOSTNAME}" >> /etc/hosts
 echo $HOSTNAME | tee \
