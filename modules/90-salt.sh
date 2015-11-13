@@ -38,6 +38,7 @@ script
   exec salt-master
 end script
 EOF
+
     cat <<EOF >> /etc/salt/master
 auto_accept: True
 file_roots:
@@ -46,7 +47,42 @@ file_roots:
     - /srv/salt/_libs
     - /srv/salt-formulas
 state_output: changes
+
+presence_events: True
+
+reactor:
+  - 'salt/auth':
+    - /etc/salt/reactor/auth.sls
+  - 'salt/minion/*/start':
+    - /etc/salt/reactor/minion-start.sls
 EOF
+
+    mkdir -p /etc/salt/reactor
+    cat <<EOF >> /etc/salt/reactor/auth.sls
+{# minion failed to authenticate -- remove accepted key #}
+{% if not data['result'] %}
+minion_remove:
+  wheel.key.delete:
+    - match: {{ data['id'] }}
+{% endif %}
+
+{# minion is sending new key -- accept this key -- duplicate with auto_accept #}
+{% if 'act' in data and data['act'] == 'pend' %}
+minion_add:
+  wheel.key.accept:
+    - match: {{ data['id'] }}
+{% endif %}
+EOF
+
+    cat <<EOF >> /etc/salt/reactor/minion-start.sls
+{# When minion connects, run test.ping & state.highstate #}
+highstate_run:
+  local.test.ping:
+    - tgt: {{ data['id'] }}
+  local.state.highstate:
+    - tgt: {{ data['id'] }}
+EOF
+
     start salt-master
 fi
 
@@ -79,11 +115,6 @@ script
   rm -Rf /etc/salt/pki/minion
 
   exec salt-minion
-end script
-
-# Starting highstate on 1st start and on each reboot
-post-start script
-  salt-call -l debug state.highstate
 end script
 
 EOF
