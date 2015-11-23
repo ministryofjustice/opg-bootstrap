@@ -128,6 +128,7 @@ EOF
 # let's set grains
 cat <<EOF >> /etc/salt/grains
 opg-role: ${OPG_ROLE}
+opg_role: ${OPG_ROLE}
 EOF
 
 start salt-minion
