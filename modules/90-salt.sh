@@ -57,7 +57,7 @@ reactor:
     - /etc/salt/reactor/minion-start.sls
 EOF
 
-    mkdir -p /etc/salt/reactor
+    mkdir -p /etc/salt/reactor/bin
     cat <<EOF >> /etc/salt/reactor/auth.sls
 {# minion failed to authenticate -- remove accepted key #}
 {% if not data['result'] %}
@@ -74,6 +74,15 @@ minion_add:
 {% endif %}
 EOF
 
+    wget --retry-connrefused \
+         --random-wait \
+         --tries=5 \
+         --timeout=60 \
+         --wait=10 \
+         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/opg_tags_to_grains/bin/tags2grains.py
+
+    chmod -R +x /etc/salt/reactor/bin/
+
     cat <<EOF >> /etc/salt/reactor/minion-start.sls
 {# When minion connects, run test.ping & state.highstate #}
 highstate_run:
@@ -82,6 +91,16 @@ highstate_run:
   local.state.highstate:
     - tgt: {{ data['id'] }}
 EOF
+
+    if [[ -s /etc/salt/reactor/bin/tags2grains.py && -x /etc/salt/reactor/bin/tags2grains.py ]] ; then
+        cat <<EOF >> /etc/salt/reactor/minion-start.sls
+  local.cmd.run:
+    - name: get ec2 tags
+    - tgt: {{ data['id'] }}
+    - arg:
+      - '/etc/salt/reactor/bin/tags2grains.py'
+EOF
+    fi
 
     start salt-master
 fi
