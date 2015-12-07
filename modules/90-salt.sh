@@ -79,7 +79,7 @@ EOF
          --tries=5 \
          --timeout=60 \
          --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/opg_tags_to_grains/bin/tags2grains.py
+         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/bin/tags2grains.py
 
     chmod -R +x /etc/salt/reactor/bin/
 
