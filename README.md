@@ -18,6 +18,7 @@ configuration
 - is_saltmaster - is host a salt master or minion
 - has_data_storage - have you attached ebs volume?
 - opg_role - sets opg-role grain to this value (to be deprecated in favour to aws tags)
+- docker_engine_version - docker engine version to install
 - docker_compose_version - what docker compose version to install
 - salt_version - what salt version to install
 
@@ -32,6 +33,20 @@ how to use it
 1st you need to render bootstrap.sh using terraform and pass all required variables.
 I.e.:
 ```
+variable "salt_version" {
+    # used to install salt with pip
+    default = "2015.5.6"
+}
+
+variable "docker_engine_version" {
+    # as docker engine is installed using apt-get, you can leverage the "-*" form
+    default = "1.9.1-*"
+}
+
+variable "docker_compose_version" {
+    default = "1.5.2"
+}
+
 resource "template_file" "user_data_monitoring" {
     filename = "bootstrap_dev.sh"
     vars {
@@ -40,6 +55,7 @@ resource "template_file" "user_data_monitoring" {
         opg_role = "monitoring"
 
         salt_version = "${var.salt_version}"
+        docker_engine_version = "${var.docker_engine_version}"
         docker_compose_version = "${var.docker_compose_version}"
     }
 }
