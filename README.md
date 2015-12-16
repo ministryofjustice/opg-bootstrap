@@ -18,6 +18,7 @@ configuration
 - is_saltmaster - is host a salt master or minion
 - has_data_storage - have you attached ebs volume?
 - opg_role - sets opg-role grain to this value (to be deprecated in favour to aws tags)
+- docker_engine_version - docker engine version to install
 - docker_compose_version - what docker compose version to install
 - salt_version - what salt version to install
 
