@@ -42,7 +42,7 @@ EOF
 
 
 echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
-apt-get update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/docker.list
+apt-get update
 apt-get install -y docker-engine=${DOCKER_ENGINE_VERSION:-"1.9.1-*"}
 
 curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION:-"1.5.2"}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
