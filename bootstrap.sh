@@ -25,10 +25,13 @@ function module()
     source $${module_path}
 }
 
-readonly ROLE=${role}
+readonly IS_SALTMASTER=${is_saltmaster}
+readonly HAS_DATA_STORAGE=${has_data_storage}
+readonly OPG_ROLE=${opg_role}
 
-readonly DOCKER_VERSION=${docker_version}
-readonly STACK=${stack}
+readonly DOCKER_COMPOSE_VERSION=${docker_compose_version}
+readonly SALT_VERSION=${salt_version}
+readonly OPG_STACK=${stack}
 
 module modules/00-start.sh
 module modules/10-volumes.sh
