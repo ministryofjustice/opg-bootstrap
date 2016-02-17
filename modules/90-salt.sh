@@ -87,9 +87,8 @@ EOF
 
 # let's set grains
 cat <<EOF >> /etc/salt/grains
-opg_role: ${OPG_ROLE}
-opg_stackname: ${OPG_STACK}
-opg_project: lpa
+role: ${ROLE}
+stackname: ${STACK}
 EOF
 
 rm -f /etc/salt/pki/minion/minion_master.pub
