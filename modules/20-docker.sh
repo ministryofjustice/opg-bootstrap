@@ -1,13 +1,14 @@
 #!/bin/bash
+set -e
 
 # install docker
-echo Installing Docker
+echo "Installing Docker"
 
 #as key server fails once a while...
 #apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
 #...we are shipping the repository key ourselves
-apt-key add - <<EOF
+apt-key add - <<'EOF'
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1
 
@@ -42,10 +43,18 @@ EOF
 
 
 echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
-apt-get update
-apt-get install -y docker-engine=${DOCKER_ENGINE_VERSION:-"1.9.1-*"}
 
-curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION:-"1.5.2"}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+apt-get -y -qq update
+
+if [[ "x${DOCKER_ENGINE_VERSION}" == "x" ]]
+then
+    apt-get install -y -qq docker-engine
+else
+    apt-get install -y -qq docker-engine="${DOCKER_ENGINE_VERSION}"
+fi
+
+curl -s -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION:-'1.6.2'}/docker-compose-$(uname -s)-$(uname -m)" > /usr/local/bin/docker-compose
+
 chmod +x /usr/local/bin/docker-compose
 
 echo "DOCKER_OPTS=\"\${DOCKER_OPTS} --ipv6=false --log-driver=syslog\"" >> /etc/default/docker

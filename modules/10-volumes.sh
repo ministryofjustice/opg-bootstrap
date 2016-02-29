@@ -1,12 +1,12 @@
 #!/bin/bash
-
+set -e
 
 
 function fstype()
 # returns on stdout a filesystem type
 #  volume can be unmounted)
 {
-    blkid -o value -s TYPE $1
+    blkid -o value -s TYPE "${1}"
 }
 
 echo Cleanup /etc/fstab
@@ -30,13 +30,13 @@ sed -i -e \
 
 echo Scaning SCSI bus to look for new devices
 for b in /sys/class/scsi_host/*/scan; do
-    echo '- - -' > $b
+    echo '- - -' > "${b}"
 done
 
 echo Refreshing partition table for each block device.
 for b in $(lsblk -dno NAME | awk '!/(sr.*|mapper)/ { print $1 }'); do
     echo "Refreshing: ${b}"
-    sfdisk -R /dev/${b} 2> /dev/null || true
+    sfdisk -R "/dev/${b}" 2> /dev/null || true
 done
 
 
@@ -50,7 +50,7 @@ SERVICE_STORAGE_DEVICES_COUNT=0
 
 # Get the list of Ephemeral devices from Amazon ...
 EPHEMERALS=($(
-    curl -s ${EC2_METADATA_URL}/block-device-mapping/ | \
+    curl -s "${EC2_METADATA_URL}/block-device-mapping/" | \
         awk '/ephemeral[[:digit:]]+/ { print }'
 ))
 
@@ -59,13 +59,13 @@ EPHEMERALS=($(
 # meta-data service would return data where no actual
 # device is present.
 for d in "${EPHEMERALS[@]}"; do
-    DEVICE=$(curl -s ${EC2_METADATA_URL}/block-device-mapping/${d})
+    DEVICE=$(curl -s "${EC2_METADATA_URL}/block-device-mapping/${d}")
     if [[ -n $DEVICE ]]; then
         # Try to detect the device, taking into
         # the account different naming scheme
         # e.g., /dev/sdb vs /dev/xvdb, etc.
         if [[ ! -b /dev/${DEVICE} ]]; then
-            DEVICE=${DEVICE/sd/xvd}
+            DEVICE="${DEVICE/sd/xvd}"
             [[ -b /dev/${DEVICE} ]] || continue
         fi
     fi
@@ -125,29 +125,30 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
 
     # Wipe any old file system signature, just in case.
     for d in "${SERVICE_STORAGE_DEVICES[@]}"; do
-        wipefs -a$(wipefs -f &>/dev/null && echo 'f') $d
+       # wipefs -a "$(wipefs -f &>/dev/null && echo 'f')" "${d}"
+        wipefs -a "${d}"
     done
 fi
 
 
 # Add support for the Copy-on-Write (CoW) file system
 # using the "btrfs" over the default "aufs".
-if [[ $SERVICE_STORAGE == 'yes' ]]; then
+if [[ "$SERVICE_STORAGE" == 'yes' ]]; then
 
     # Make sure to install dependencies if needed.
     if ! dpkg -s btrfs-tools &>/dev/null; then
-        apt-get -y --force-yes --no-install-recommends install btrfs-tools
+        apt-get -y -qq --no-install-recommends install btrfs-tools
     fi
 
     # Grab first device (to be used when mounting).
-    DEVICE=${SERVICE_STORAGE_DEVICES[0]}
+    DEVICE="${SERVICE_STORAGE_DEVICES[0]}"
 
     # Create RAID0 if there is more than one device.
-    if (( $SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
+    if (( SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
         mkfs.btrfs -L '/srv' -d raid0 -f \
-            $(printf '%s\n' "${SERVICE_STORAGE_DEVICES[@]}")
+            "$(printf '%s\n' "${SERVICE_STORAGE_DEVICES[@]}")"
     else
-        mkfs.btrfs -L '/srv' -f $DEVICE
+        mkfs.btrfs -L '/srv' -f "${DEVICE}"
     fi
 
     # Add extra volume.
@@ -156,7 +157,7 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
     mount /srv
     btrfs filesystem show /srv
 
-    if (( $SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
+    if (( SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
         # Make sure to initially re-balance stripes.
         btrfs filesystem balance /srv
     fi
@@ -202,7 +203,7 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
 fi
 
 
-echo Fetching attached volume configuration
+echo "Fetching attached volume configuration"
 # Select correct device for the extra attached EBS-backed
 # volume (usually mounted under the /data mount point).
 DATA_STORAGE='no'
@@ -212,25 +213,25 @@ if [[ $HAS_DATA_STORAGE == 'yes' ]]; then
     COUNT=0
     while [[ $DATA_STORAGE == 'no' ]]; do
         # Keep waiting up to 5 minutes (extreme case) for the volume.
-        if (( $COUNT >= 60 )); then
-            echo "Unable to find device $DATA_STORAGE_DEVICE, volume not attached?"
+        if (( COUNT >= 60 )); then
+            echo "Unable to find device ${DATA_STORAGE_DEVICE}, volume not attached?"
             break
         fi
 
         for d in /dev/{xvdh,sdh}; do
             if [[ -b $d ]]; then
                 DATA_STORAGE='yes'
-                DATA_STORAGE_DEVICE=$d
+                DATA_STORAGE_DEVICE="${d}"
                 break
             fi
         done
 
-        COUNT=$(( $COUNT + 1 ))
+        COUNT=$(( COUNT + 1 ))
         sleep 5
     done
 fi
 
-if [[ $DATA_STORAGE == 'yes' ]]; then
+if [[ "${DATA_STORAGE}" == 'yes' ]]; then
     # Make sure that /data is not mounted.
     if [[ -d /data ]]; then
         umount -f /data || true
@@ -244,11 +245,11 @@ if [[ $DATA_STORAGE == 'yes' ]]; then
     # Setup the /data mount point on a solid file system (EXT4).
     # If EBS is already formatted and has file /data/.opg-keep
     DATA_STORAGE_FORMAT='no'
-    if mount ${DATA_STORAGE_DEVICE} /data; then
+    if mount "${DATA_STORAGE_DEVICE}" /data; then
         if [[ -e /data/.opg-keep ]]; then
             # an edge case when we attache volume that was already provisioned
             # just keep it
-            DATA_STORAGE_CURRENT_FSTYPE=$(fstype ${DATA_STORAGE_DEVICE})
+            DATA_STORAGE_CURRENT_FSTYPE="$(fstype ${DATA_STORAGE_DEVICE})"
             echo "${DATA_STORAGE_DEVICE} /data ${DATA_STORAGE_CURRENT_FSTYPE} defaults,noatime 0 2" >> /etc/fstab
             DATA_STORAGE_FORMAT='no'
         else
@@ -260,12 +261,30 @@ if [[ $DATA_STORAGE == 'yes' ]]; then
         DATA_STORAGE_FORMAT='yes'
     fi
 
-    if [[ $DATA_STORAGE_FORMAT == 'yes' ]]; then
+    if [[ "$DATA_STORAGE_FORMAT" == 'yes' ]]; then
         echo "Formatting ${DATA_STORAGE_DEVICE}"
-        mkfs.ext4 ${DATA_STORAGE_DEVICE}
+        mkfs.ext4 "${DATA_STORAGE_DEVICE}"
         echo "${DATA_STORAGE_DEVICE} /data ext4 defaults,noatime 0 2" >> /etc/fstab
         mount /data
         touch /data/.opg-keep
         chattr +i /data/.opg-keep
     fi
+fi
+
+if [[ "$DOCKER_NFS_DATA" == 'yes' ]]; then
+    # Make sure that /data is not mounted.
+    if [[ -d /data ]]; then
+        umount -f /data || true
+    else
+        mkdir -p /data
+    fi
+
+    chown root:root /data
+    chmod 755 /data
+    #install nfs client requirements
+    apt-get install nfs-common nfs-utils
+    #Update fstab with entry for NFS mount
+    echo "nfs01:/data /data nfs auto,_netdev,nolock,noatime,nfsvers=3,tcp,actimeo=1800 0 0" >> etc/fstab
+    #Test that the mount works
+    mount /data
 fi

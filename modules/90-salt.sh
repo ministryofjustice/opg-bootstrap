@@ -1,16 +1,23 @@
 #!/bin/bash
+set -e
 
 ################################################### install salt
-echo Installing salt
-apt-get -y --force-yes install build-essential pkg-config swig
-apt-get -y --force-yes install libyaml-0-2 libgmp10
-apt-get -y --force-yes install python-dev libyaml-dev libgmp-dev libssl-dev
-apt-get -y --force-yes install libzmq3 libzmq3-dev python-m2crypto
-apt-get -y --force-yes install procps pciutils
-apt-get -y --force-yes install python-pip
+echo "Installing salt"
+apt-get -y -qq install build-essential pkg-config swig
+apt-get -y -qq install libyaml-0-2 libgmp10
+apt-get -y -qq install python-dev libyaml-dev libgmp-dev libssl-dev
+apt-get -y -qq install libzmq3 libzmq3-dev python-m2crypto
+apt-get -y -qq install procps pciutils
+apt-get -y -qq install python-pip
 
 pip install pyzmq pycrypto gitpython psutil boto boto3
-pip install salt==${SALT_VERSION}
+
+if [[ "x${SALT_VERSION}" == "x" ]]
+then
+    pip install --upgrade salt
+else
+    pip install --upgrade salt=="${SALT_VERSION}"
+fi
 
 mkdir -p /etc/salt
 
@@ -19,7 +26,7 @@ mkdir -p /etc/salt
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
     # let's' install upstart job for salt-master
-    cat <<EOF >> /etc/init/salt-master.conf
+    cat <<'EOF' >> /etc/init/salt-master.conf
 description "Salt Master"
 
 start on (net-device-up
@@ -39,7 +46,7 @@ script
 end script
 EOF
 
-    cat <<EOF >> /etc/salt/master
+    cat <<'EOF' >> /etc/salt/master
 auto_accept: True
 file_roots:
   base:
@@ -58,7 +65,7 @@ reactor:
 EOF
 
     mkdir -p /etc/salt/reactor/bin
-    cat <<EOF >> /etc/salt/reactor/auth.sls
+    cat <<'EOF' >> /etc/salt/reactor/auth.sls
 {# minion failed to authenticate -- remove accepted key #}
 {% if not data['result'] %}
 minion_remove:
@@ -83,7 +90,7 @@ EOF
 
     chmod -R +x /etc/salt/reactor/bin/
 
-    cat <<EOF >> /etc/salt/reactor/minion-start.sls
+    cat <<'EOF' >> /etc/salt/reactor/minion-start.sls
 {# When minion connects, run test.ping & state.highstate #}
 highstate_run:
   local.test.ping:
@@ -93,12 +100,12 @@ highstate_run:
 EOF
 
     if [[ -s /etc/salt/reactor/bin/tags2grains.py && -x /etc/salt/reactor/bin/tags2grains.py ]] ; then
-        cat <<EOF >> /etc/salt/reactor/minion-start.sls
-  local.cmd.run:
-    - name: get ec2 tags
-    - tgt: {{ data['id'] }}
-    - arg:
-      - '/etc/salt/reactor/bin/tags2grains.py'
+        cat <<'EOF' >> /etc/salt/reactor/minion-start.sls
+local.cmd.run:
+  - name: get ec2 tags
+  - tgt: {{ data['id'] }}
+  - arg:
+    - '/etc/salt/reactor/bin/tags2grains.py'
 EOF
     fi
 
@@ -108,8 +115,10 @@ fi
 
 ##### salt-minion
 
-# let's' install upstart job for salt-minion
-cat <<EOF >> /etc/init/salt-minion.conf
+# let's' install upstart job for salt-minion if we are running with a master
+if [ "${SALT_STANDALONE}" != "yes" ]
+then
+    cat <<'EOF' >> /etc/init/salt-minion.conf
 
 description "Salt Minion"
 
@@ -137,19 +146,38 @@ script
 end script
 
 EOF
+fi
 
 # salt-minon configuration
-cat <<EOF >> /etc/salt/minion
+cat <<'EOF' >> /etc/salt/minion
 log_level: warning
 log_level_logfile: all
 EOF
 
 # let's set grains
 cat <<EOF >> /etc/salt/grains
-opg-role: ${OPG_ROLE}
 opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACKNAME}
 opg_project: ${OPG_PROJECT}
+opg_stack: "${OPG_STACK}"
 EOF
 
-start salt-minion
+#start salt minion service when not in standalone mode
+if [[ "${SALT_STANDALONE}" == "yes" ]]
+then
+    #remove salt-minion service
+    update-rc.d -f salt-minion remove 2>/dev/null
+    # The salt formulae, pillars, etc are held in an s3 bucket.
+    aws --region=eu-west-1 s3 sync "${SALT_S3_PATH}" /srv/
+    #add the root dirs to the salt config
+    cat <<EOF >> /etc/salt/minion
+file_roots:
+  base:
+    - /srv/salt
+    - /srv/salt/_libs
+    - /srv/salt-formulas
+EOF
+    salt-call --local state.highstate
+else
+    start salt-minion
+fi

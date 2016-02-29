@@ -10,22 +10,25 @@ Provisions VM with:
 
 Setups filesystem:
 - /srv (btrfs: as raid0 of all available ephemeral volumes - only if available)
-- /data (ext4: as attached ebs volume - only if available)
+- /data (nfs or attached ebs volume(ext4) - only if needed)
 
 
 configuration
 =============
+- salt_standalone - configure to run without salt master
 - is_saltmaster - is host a salt master or minion
 - has_data_storage - have you attached ebs volume?
 - opg_role - sets opg-role grain to this value (to be deprecated in favour to aws tags)
-- docker_engine_version - docker engine version to install
-- docker_compose_version - what docker compose version to install
+- docker_engine_version - docker engine version to install (will install latest version if not set)
+- docker_compose_version - what docker compose version to install (will install latest version if not set)
+- use_nfs_data - use nfs to persist container data.
 - salt_version - what salt version to install
+- salt_s3_path - The s3 path for masterless salt operation
 
 
 attached volume
 ===============
-Assumes that ebs volume is attached at /dev/sdh or /dev/xvdh
+Assumes that ebs volume is attached at /dev/sdh or /dev/xvdh.  If this is a node for and ECS cluster, there will be an NFS mount for /data.
 
 
 how to use it
