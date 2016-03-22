@@ -44,7 +44,7 @@ then
 fi
 
 
-if [ "${USE_DOCKER}" == "yes" ]
+if [[ "${USE_DOCKER}" == "yes" ]]
 then
 ################################################### docker stop
     echo "Ensuring docker is stopped"
@@ -81,7 +81,7 @@ else
 fi
 EOF
 OPG_STACK=$(echo "${OPG_STACK}"| tr -d '[:digit:]')
-if [  "${OPG_STACK}" == "production" ]
+if [[ "${OPG_STACK}" =~ ^production ]]
 then
     sed -i "1s/^/PS1=\"\\\[\\\033[01;31m\\\](${OPG_STACK}) \\\u@${OPG_ROLE}:\"\n/" /etc/profile.d/bash-prompt.sh
 else
