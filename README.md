@@ -10,22 +10,27 @@ Provisions VM with:
 
 Setups filesystem:
 - /srv (btrfs: as raid0 of all available ephemeral volumes - only if available)
-- /data (ext4: as attached ebs volume - only if available)
+- /data (nfs or attached ebs volume(ext4) - only if needed)
 
 
 configuration
 =============
-- is_saltmaster - is host a salt master or minion
-- has_data_storage - have you attached ebs volume?
-- opg_role - sets opg-role grain to this value (to be deprecated in favour to aws tags)
-- docker_engine_version - docker engine version to install
-- docker_compose_version - what docker compose version to install
-- salt_version - what salt version to install
-
+- USE_SALT - whether to install salt
+- SALT_STANDALONE - configure to run without salt master
+- IS_SALTMASTER - is host a salt master or minion
+- SALT_VERSION - what salt version to install
+- SALT_S3_PATH - The s3 path for masterless salt operation
+- HAS_DATA_STORAGE - have you attached ebs volume?
+- USE_DOCKER - whether to install docker
+- DOCKER_ENGINE_VERSION - docker engine version to install (will install latest version if not set)
+- DOCKER_COMPOSE_VERSION - what docker compose version to install (will install latest version if not set)
+- DOCKER_NFS_DATA - use nfs to persist container data.
+- OPG_ROLE - sets opg-role grain to this value (to be deprecated in favour to aws tags)
+- OPG_STACK - sets opg-stack grain to this value
 
 attached volume
 ===============
-Assumes that ebs volume is attached at /dev/sdh or /dev/xvdh
+Assumes that ebs volume is attached at /dev/sdh or /dev/xvdh.  If this is a node for and ECS cluster, there will be an NFS mount on /nfsdata.
 
 
 how to use it
@@ -53,7 +58,6 @@ resource "template_file" "user_data_monitoring" {
         is_saltmaster = "no"
         has_data_storage = "yes"
         opg_role = "monitoring"
-
         salt_version = "${var.salt_version}"
         docker_engine_version = "${var.docker_engine_version}"
         docker_compose_version = "${var.docker_compose_version}"
