@@ -10,6 +10,9 @@ apt-get -y -qq install libzmq3 libzmq3-dev python-m2crypto
 apt-get -y -qq install procps pciutils
 apt-get -y -qq install python-pip
 
+#upgrade pip to latest version
+pip install --upgrade pip
+
 pip install pyzmq pycrypto gitpython psutil boto boto3
 
 if [[ "x${SALT_VERSION}" == "x" ]]
