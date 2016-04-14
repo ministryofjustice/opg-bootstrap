@@ -183,4 +183,5 @@ EOF
     salt-call --local state.highstate
 else
     start salt-minion
+    salt-call state.highstate
 fi
