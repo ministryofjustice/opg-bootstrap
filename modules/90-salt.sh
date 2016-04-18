@@ -200,8 +200,6 @@ else
         sleep 1
     done
 
-    echo ${#MASTER_RESPONSES[@]}
-
     # Do not attempt to run the Salt highstate
     # if the Salt Master is not responding.
     if (( ${#MASTER_RESPONSES[@]} < 2 )); then
@@ -209,9 +207,7 @@ else
         exit 1
     fi
 
-    # Start minion and run highstate twice
-    # First to accept key, second to make changes
+    # Start minion and run highstate
     start salt-minion
-    salt-call state.highstate
     salt-call state.highstate
 fi
