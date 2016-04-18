@@ -209,7 +209,9 @@ else
         exit 1
     fi
 
-    # Restart minion and run highstate
-    restart salt-minion
+    # Start minion and run highstate twice
+    # First to accept key, second to make changes
+    start salt-minion
+    salt-call state.highstate
     salt-call state.highstate
 fi
