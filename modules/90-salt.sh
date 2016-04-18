@@ -182,6 +182,34 @@ file_roots:
 EOF
     salt-call --local state.highstate
 else
-    start salt-minion
+    # Check whether there is a connectivity with the
+    # Salt Master by checking both ports on which it
+    # should listen (4505 and 4506).
+    MASTER_RESPONSES=()
+
+    for n in {1..10}; do
+        for p in 4505 4506; do
+            if nc -z -w 3 salt $p &> /dev/null; then
+                MASTER_RESPONSES+=( $p )
+            fi
+        done
+
+        # Break from loop if both ports responding
+        (( ${#MASTER_RESPONSES[@]} >= 2 )) && break
+
+        sleep 1
+    done
+
+    echo ${#MASTER_RESPONSES[@]}
+
+    # Do not attempt to run the Salt highstate
+    # if the Salt Master is not responding.
+    if (( ${#MASTER_RESPONSES[@]} < 2 )); then
+        echo "Unable to contact the Salt Master, aborting..."
+        exit 1
+    fi
+
+    # Restart minion and run highstate
+    restart salt-minion
     salt-call state.highstate
 fi
