@@ -199,6 +199,9 @@ else
         sleep 1
     done
 
+    # Start salt minion
+    start salt-minion
+
     # Do not attempt to run the Salt highstate
     # if the Salt Master is not responding.
     if (( ${#MASTER_RESPONSES[@]} < 2 )); then
@@ -206,7 +209,6 @@ else
         exit 1
     fi
 
-    # Start minion and run highstate
-    start salt-minion
-    salt-call state.highstate
+    # Run highstate
+    salt-call state.highstate || true
 fi
