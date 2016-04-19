@@ -162,7 +162,6 @@ cat <<EOF >> /etc/salt/grains
 opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACKNAME}
 opg_project: ${OPG_PROJECT}
-opg_stack: "${OPG_STACK}"
 EOF
 
 #start salt minion service when not in standalone mode

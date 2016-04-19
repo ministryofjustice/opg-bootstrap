@@ -5,12 +5,22 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 export DEBIAN_FRONTEND=noninteractive
 readonly EC2_METADATA_URL='http://169.254.169.254/latest/meta-data'
 
-#Setup hosts file
-echo "Updating hostname"
-# domain name and resolv.conf ar managed through dhcp
-IP=$(curl -s "${EC2_METADATA_URL}/local-ipv4")
-echo "${IP} ${HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+########################################################
+# Update hostname
+# resolv.conf is managed via DHCP
+IP=$(curl -s ${EC2_METADATA_URL}/local-ipv4)
+ID=$(curl -s ${EC2_METADATA_URL}/instance-id)
+HOSTNAME="${OPG_ROLE}-${ID}"
+echo "Updating hostname to: ${HOSTNAME}"
 
+echo "${IP} ${HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+echo $HOSTNAME | tee \
+    /proc/sys/kernel/hostname \
+    /etc/hostname
+hostname -F /etc/hostname
+
+# Restart rsyslog to pickup new hostname
+service rsyslog restart
 
 # Make sure files are 644 and directories are 755.
 umask 022
