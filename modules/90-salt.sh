@@ -185,9 +185,9 @@ else
     # Check whether there is a connectivity with the
     # Salt Master by checking both ports on which it
     # should listen (4505 and 4506).
-    MASTER_RESPONSES=()
-
     for n in {1..10}; do
+        MASTER_RESPONSES=()
+
         for p in 4505 4506; do
             if nc -z -w 3 salt $p &> /dev/null; then
                 MASTER_RESPONSES+=( $p )
