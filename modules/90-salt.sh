@@ -59,6 +59,7 @@ file_roots:
     - /srv/reactor
 state_output: changes
 
+
 ##PILLAR_ROOT_TOKEN_BEGIN##
 ##PILLAR_ROOT_TOKEN_END##
 
