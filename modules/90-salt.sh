@@ -59,6 +59,11 @@ file_roots:
     - /srv/reactor
 state_output: changes
 
+pillar_roots:
+  base:
+    - /srv/pillar
+    ##PILLAR_ROOT_TOKEN##
+
 presence_events: True
 
 reactor:
