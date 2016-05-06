@@ -60,9 +60,6 @@ file_roots:
 state_output: changes
 
 ##PILLAR_ROOT_TOKEN_BEGIN##
-pillar_roots:
-  base:
-    - /srv/pillar
 ##PILLAR_ROOT_TOKEN_END##
 
 presence_events: True
