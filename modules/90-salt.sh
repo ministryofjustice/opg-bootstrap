@@ -163,6 +163,11 @@ opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACKNAME}
 opg_project: ${OPG_PROJECT}
 opg_stack: "${OPG_STACK}"
+
+opg_environment: ${OPG_ENVIRONMENT}
+opg_account_id: "${OPG_ACCOUNT_ID}"
+opg_region_id: "${OPG_REGION_ID}"
+opg_shared_suffix: "${OPG_SHARED_SUFFIX}"
 EOF
 
 #start salt minion service when not in standalone mode
