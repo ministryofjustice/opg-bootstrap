@@ -168,6 +168,7 @@ opg_environment: ${OPG_ENVIRONMENT}
 opg_account_id: "${OPG_ACCOUNT_ID}"
 opg_region_id: "${OPG_REGION_ID}"
 opg_shared_suffix: "${OPG_SHARED_SUFFIX}"
+opg_domain: "${OPG_DOMAIN}"
 EOF
 
 #start salt minion service when not in standalone mode
