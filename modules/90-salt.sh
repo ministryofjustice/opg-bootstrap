@@ -65,6 +65,8 @@ reactor:
     - /etc/salt/reactor/auth.sls
   - 'salt/minion/*/start':
     - /etc/salt/reactor/minion-start.sls
+  - 'salt/trigger_highstate':
+    - /etc/salt/reactor/trigger-highstate.sls
 EOF
 
     mkdir -p /etc/salt/reactor/bin
@@ -100,6 +102,13 @@ highstate_run:
     - tgt: {{ data['id'] }}
   local.state.highstate:
     - tgt: {{ data['id'] }}
+EOF
+
+    cat <<'EOF' >> /etc/salt/reactor/trigger-highstate.sls
+{# When a remote highstate is called #}
+trigger_highstate:
+  local.state.apply:
+    - tgt: '*'
 EOF
 
     if [[ -s /etc/salt/reactor/bin/tags2grains.py && -x /etc/salt/reactor/bin/tags2grains.py ]] ; then
