@@ -110,12 +110,6 @@ EOF
 start_highstate:
   local.state.highstate:
     - tgt: '*'
-{# see if it is still running #}
-{%  elif data['tag'] == 'salt/custom/active_jobs' %}
-active_jobs:
-  local.jobs.active:
-    - tgt: '*'
-{%  endif %}
 EOF
 
     if [[ -s /etc/salt/reactor/bin/tags2grains.py && -x /etc/salt/reactor/bin/tags2grains.py ]] ; then
