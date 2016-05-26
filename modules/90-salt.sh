@@ -67,7 +67,7 @@ reactor:
   - 'salt/minion/*/start':
     - /etc/salt/reactor/minion-start.sls
   - 'salt/custom/*':
-    - 'salt://reactor/custom-reactors.sls'
+    - 'salt://custom-reactors.sls'
 
 EOF
 
@@ -113,6 +113,8 @@ EOF
 start_highstate:
   local.state.highstate:
     - tgt: '*'
+
+{% endif %}
 EOF
 
 
