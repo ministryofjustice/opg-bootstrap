@@ -1,0 +1,17 @@
+---
+#block for os specific tasks
+- name: Run tests on salted instance
+  script: check_bootstrap.py salt
+#  ignore_errors: true
+  failed_when: "'Bootstrap failed' in salt_test.stdout_lines"
+  register: salt_test
+  when: "'salt' in '{{ inventory_hostname }}'"
+
+- name: Run tests on dockerized instance
+  script: check_bootstrap.py docker
+#  ignore_errors: true
+  failed_when: "'Bootstrap failed' in docker_test.stdout_lines"
+  register: docker_test
+  when: "'docker' in '{{ inventory_hostname }}'"
+
+
