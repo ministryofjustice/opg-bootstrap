@@ -155,10 +155,9 @@ else
     # Do not attempt to run the Salt highstate
     # if the Salt Master is not responding.
     if (( ${#MASTER_RESPONSES[@]} < 2 )); then
-        echo "Unable to contact the Salt Master, aborting..."
+        echo "Unable to contact the Salt Master, Not running highstate"
         exit 1
+    else
+        salt-call state.highstate || true
     fi
-
-    # Run highstate? the minions ervice should cause the node to auto highstate once it connects to the master.
-    #salt-call state.highstate || true
 fi
