@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#let's log the output
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+function download()
+{
+  #try downloading a file for 5 mins
+  local module_path=${1}
+  local retry_count_down=30
+  while ! wget --no-verbose --retry-connrefused --random-wait -O ${module_path} https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-v0.1.2}/${module_path} && [ ${retry_count_down} -gt 0 ] ; do
+      retry_count_down=$((retry_count_down - 1))
+      sleep 10
+  done
+}
+
+function module()
+{
+  local module_path=${1}
+  if [ ! -e ${module_path} ]; then
+      echo ${module_path}: Downloading
+      mkdir -p modules
+      download ${module_path}
+  fi
+  echo ${module_path}: Loading
+  source ${module_path}
+}
+readonly HAS_DATA_STORAGE={{ test_nfs|default('no') }}
+readonly OPG_ROLE="test"
+readonly OPG_STACKNAME="test"
+readonly OPG_PROJECT="test"
+readonly OPG_ENVIRONMENT="test"
+readonly OPG_DOMAIN="test.internal"
+readonly BS_BRANCH={{ git_branch }}
+readonly USE_SALT=yes
+readonly IS_SALTMASTER=yes
+{% if test_type|default('docker') == 'docker' %}
+readonly USE_DOCKER=yes
+{%- else %}
+readonly USE_DOCKER=no
+{% endif %}
+
+module modules/00-start.sh
+module modules/10-volumes.sh
+[[ "${USE_DOCKER}" = "no" ]] || module modules/20-docker.sh
+[[ "${USE_SALT}" = "no" ]] || module modules/90-salt.sh
+module modules/99-end.sh

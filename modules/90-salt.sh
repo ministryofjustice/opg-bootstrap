@@ -1,56 +1,24 @@
 #!/bin/bash
 set -e
 
-################################################### install salt
-echo "Installing salt"
-apt-get -y -qq install build-essential pkg-config swig
-apt-get -y -qq install libyaml-0-2 libgmp10
-apt-get -y -qq install python-dev libyaml-dev libgmp-dev libssl-dev
-apt-get -y -qq install libzmq3 libzmq3-dev python-m2crypto
-apt-get -y -qq install procps pciutils
-apt-get -y -qq install python-pip
-
-#upgrade pip to latest version
-pip install --upgrade pip
-
-pip install pyzmq pycrypto gitpython psutil boto boto3
-
-if [[ "x${SALT_VERSION}" == "x" ]]
-then
-    pip install --upgrade salt
-else
-    pip install --upgrade salt=="${SALT_VERSION}"
-fi
-
 mkdir -p /etc/salt
 
+[[ -f /etc/salt/minion_id ]] && rm -f /etc/salt/minion_id
+[[ -f /etc/salt/pki/minion/minion.pem ]] && rm -f /etc/salt/pki/minion/minion.pem
+[[ -f /etc/salt/pki/minion/minion.pub ]] && rm -f /etc/salt/pki/minion/minion.pub
 
 ##### salt-master
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
-    # let's' install upstart job for salt-master
-    cat <<'EOF' >> /etc/init/salt-master.conf
-description "Salt Master"
-
-start on (net-device-up
-          and local-filesystems
-          and runlevel [2345])
-stop on runlevel [!2345]
-limit nofile 100000 100000
-
-script
-  # Read configuration variable file if it is present
-  [ -f /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
-
-  # Activate the virtualenv if defined
-  [ -f $SALT_USE_VIRTUALENV/bin/activate ] && . $SALT_USE_VIRTUALENV/bin/activate
-
-  exec salt-master
-end script
-EOF
+    #install the salt-master package from the salt repo in the ami
+    apt-get -y update
+    apt-get -y install salt-master salt-api salt-ssh
+    #fix 14.04 issue with upstart and sysv start scripts
+    [[ -f /etc/init/sal-master.conf && -f /etc/init.d/salt-master ]] && echo manual >> /etc/init/salt-master.override
 
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
+hash_type: sha256
 file_roots:
   base:
     - /srv/salt
@@ -101,43 +69,8 @@ start_highstate:
 EOF
 
 
-    start salt-master
-fi
-
-
-##### salt-minion
-
-# let's' install upstart job for salt-minion if we are running with a master
-if [ "${SALT_STANDALONE}" != "yes" ]
-then
-    cat <<'EOF' >> /etc/init/salt-minion.conf
-
-description "Salt Minion"
-
-start on (net-device-up
-          and local-filesystems
-          and runlevel [2345])
-stop on runlevel [!2345]
-
-# respawn forever
-post-stop exec sleep 10
-respawn
-respawn limit 10 5
-
-script
-  # Read configuration variable file if it is present
-  [ -f /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
-
-  # Activate the virtualenv if defined
-  [ -f $SALT_USE_VIRTUALENV/bin/activate ] && . $SALT_USE_VIRTUALENV/bin/activate
-  
-  # Force minion to rebuild key on each boot so that after salt-master failure all we need is to reboot VMs one by one
-  rm -Rf /etc/salt/pki/minion
-
-  exec salt-minion
-end script
-
-EOF
+    update-rc.f defaults salt-master || systemctl enable salt-master
+    start salt-master || systemctl start salt-master
 fi
 
 # salt-minon configuration
@@ -158,7 +91,6 @@ opg_environment: ${OPG_ENVIRONMENT}
 opg_account_id: "${OPG_ACCOUNT_ID}"
 opg_shared_suffix: "${OPG_SHARED_SUFFIX}"
 opg_domain: "${OPG_DOMAIN}"
-
 opg_aws_instance_id: "${AWS_INSTANCE_ID}"
 EOF
 
@@ -166,7 +98,7 @@ EOF
 if [[ "${SALT_STANDALONE}" == "yes" ]]
 then
     #remove salt-minion service
-    update-rc.d -f salt-minion remove 2>/dev/null
+    update-rc.d -f salt-minion remove 2>/dev/null || systemctl disable salt-minion
     # The salt formulae, pillars, etc are held in an s3 bucket.
     aws --region=eu-west-1 s3 sync "${SALT_S3_PATH}" /srv/
     #add the root dirs to the salt config
@@ -198,6 +130,8 @@ else
     done
 
     # Start salt minion
-    start salt-minion
+    update-rc.d salt-minion defaults || systemctl enable salt-minion
+
+    service salt-minion restart
 
 fi

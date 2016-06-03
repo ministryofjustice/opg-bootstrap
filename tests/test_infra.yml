@@ -1,0 +1,35 @@
+---
+- name: Create an ec2 instance
+  ec2:
+    region: eu-west-1
+    instance_type: "{{ tests[test_type].instance_type }}"
+    image: "{{ tests[test_type].ami }}"
+    vpc_subnet_id: "{{ subnet_id }}"
+    group: "{{ test_sg }}"
+    exact_count: 1
+    count_tag:
+      Name: testrunner
+      project: opg-bootstrap
+      test_type: "{{ test_type }}"
+      git_branch: "{{ git_branch }}"
+    ebs_optimized: "{{ tests[test_type].has_ebs | default(omit) }}"
+    user_data: "{{ lookup('template', playbook_dir + '/templates/userdata.sh.j2') }}"
+    key_name: bootstrap_test_temp
+    wait: true
+    instance_tags:
+      Name: testrunner
+      project: opg-bootstrap
+      test_type: "{{ test_type }}"
+      git_branch: "{{ git_branch }}"
+  register: test_instance
+
+- name: Add new instance to host group
+  add_host:
+    hostname: "{{ test_type }}_instance"
+    groupname: "{{ test_type }}"
+    aws_id: "{{ item.id }}"
+    ansible_host: "{{ item.private_ip }}"
+    ansible_user: "ubuntu"
+  with_items: "{{ test_instance.tagged_instances|default({}) }}"
+
+

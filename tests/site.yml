@@ -1,0 +1,52 @@
+---
+#this test will create an instance using the bootstrap.sh for userdata
+#it will inject valid variables to allow the testing of all functionality
+
+- hosts: localhost
+  vars_files:
+    - vars/envvars.yml
+  pre_tasks:
+    - name: Confirm that the env is correct
+      include: env_assert.yml
+  tasks:
+    - name: Remove keypair if it exists
+      ec2_key:
+        name: bootstrap_test_temp
+        state: absent
+
+    - name: Create keypair for login
+      ec2_key:
+        name: bootstrap_test_temp
+        state: present
+        key_material: "{{ lookup ('file', ssh_pub_key_file |default('~/.ssh/id_rsa.pub')) }}"
+      register: ssh_keypair
+
+    - include: test_infra.yml
+      with_items:
+        - salt
+        - docker
+      loop_control:
+        loop_var: test_type
+
+    - name: Pause to allow instance to start and bootstrap
+      pause:
+        minutes: 4
+      when: test_instance | changed
+
+- name: Run tests
+  hosts: salt, docker
+  tasks:
+    - include: test_runner.yml
+
+- hosts: localhost
+  tasks:
+    - block:
+      - ec2:
+          instance_ids: "{{ hostvars[item]['aws_id'] }}"
+          state: absent
+        with_items: "{{ groups['salt']|default([]) + groups['docker'] |default([]) }}"
+      - name: Delete keypair for login
+        ec2_key:
+          name: bootstrap_test_temp
+          state: absent
+      when: "cleanup|default('no') == 'yes'"

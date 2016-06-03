@@ -1,0 +1,11 @@
+---
+test_sg: ["base-sg", "all-outbound-sg"]
+
+tests:
+  salt:
+    ami: ami-adc55bde
+    instance_type: t2.small
+  docker:
+    ami: ami-a8fc62db
+    instance_type: m3.xlarge
+    has_ebs: true
