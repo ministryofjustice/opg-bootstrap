@@ -42,7 +42,7 @@ TvBR8Q==
 EOF
 
 
-echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list
+echo "deb https://apt.dockerproject.org/repo ubuntu-$(lsb_release -sc) main" > /etc/apt/sources.list.d/docker.list
 
 apt-get -y -qq update
 
