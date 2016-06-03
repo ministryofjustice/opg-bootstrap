@@ -69,18 +69,8 @@ then
     fi
 fi
 
-#set default bash prompt
-echo "Setting custom bash prompt"
-cat <<'EOF' > /etc/profile.d/bash-prompt.sh
-
-if [[ ${EUID} == 0 ]]
-then
-        PS1="${PS1}\w #\[\033[00m\]"
-else
-        PS1="${PS1}\w $\[\033[00m\]"
-fi
-EOF
 OPG_STACK=$(echo "${OPG_STACK}"| tr -d '[:digit:]')
+
 if [[ "${OPG_STACK}" =~ ^production ]]
 then
     sed -i "1s/^/PS1=\"\\\[\\\033[01;31m\\\](${OPG_STACK}) \\\u@${OPG_ROLE}:\"\n/" /etc/profile.d/bash-prompt.sh
