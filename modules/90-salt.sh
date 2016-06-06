@@ -1,29 +1,7 @@
 #!/bin/bash
 set -e
 
-################################################### install salt
-echo "Installing salt"
-apt-get -y -qq install build-essential pkg-config swig
-apt-get -y -qq install libyaml-0-2 libgmp10
-apt-get -y -qq install python-dev libyaml-dev libgmp-dev libssl-dev
-apt-get -y -qq install libzmq3 libzmq3-dev python-m2crypto
-apt-get -y -qq install procps pciutils
-apt-get -y -qq install python-pip
-
-#upgrade pip to latest version
-pip install --upgrade pip
-
-pip install pyzmq pycrypto gitpython psutil boto boto3
-
-if [[ "x${SALT_VERSION}" == "x" ]]
-then
-    pip install --upgrade salt
-else
-    pip install --upgrade salt=="${SALT_VERSION}"
-fi
-
 mkdir -p /etc/salt
-
 
 ##### salt-master
 

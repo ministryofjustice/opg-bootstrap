@@ -80,4 +80,4 @@ fi
 
 echo "Install support packages"
 apt-get -y -qq update
-apt-get -y -qq install joe git awscli
+apt-get -y -qq install git awscli
