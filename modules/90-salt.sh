@@ -6,27 +6,6 @@ mkdir -p /etc/salt
 ##### salt-master
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
-    # let's' install upstart job for salt-master
-    cat <<'EOF' >> /etc/init/salt-master.conf
-description "Salt Master"
-
-start on (net-device-up
-          and local-filesystems
-          and runlevel [2345])
-stop on runlevel [!2345]
-limit nofile 100000 100000
-
-script
-  # Read configuration variable file if it is present
-  [ -f /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
-
-  # Activate the virtualenv if defined
-  [ -f $SALT_USE_VIRTUALENV/bin/activate ] && . $SALT_USE_VIRTUALENV/bin/activate
-
-  exec salt-master
-end script
-EOF
-
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
 file_roots:
@@ -74,7 +53,7 @@ EOF
          --tries=5 \
          --timeout=60 \
          --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/bin/tags2grains.py
+         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-master}master/bin/tags2grains.py
 
     chmod -R +x /etc/salt/reactor/bin/
 
@@ -108,44 +87,8 @@ local.cmd.run:
     - '/etc/salt/reactor/bin/tags2grains.py'
 EOF
     fi
-
-    start salt-master
-fi
-
-
-##### salt-minion
-
-# let's' install upstart job for salt-minion if we are running with a master
-if [ "${SALT_STANDALONE}" != "yes" ]
-then
-    cat <<'EOF' >> /etc/init/salt-minion.conf
-
-description "Salt Minion"
-
-start on (net-device-up
-          and local-filesystems
-          and runlevel [2345])
-stop on runlevel [!2345]
-
-# respawn forever
-post-stop exec sleep 10
-respawn
-respawn limit 10 5
-
-script
-  # Read configuration variable file if it is present
-  [ -f /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
-
-  # Activate the virtualenv if defined
-  [ -f $SALT_USE_VIRTUALENV/bin/activate ] && . $SALT_USE_VIRTUALENV/bin/activate
-  
-  # Force minion to rebuild key on each boot so that after salt-master failure all we need is to reboot VMs one by one
-  rm -Rf /etc/salt/pki/minion
-
-  exec salt-minion
-end script
-
-EOF
+    update-rc.f defaults salt-master || systemctl enable salt-master
+    start salt-master || systemctl start salt-master
 fi
 
 # salt-minon configuration
@@ -171,7 +114,7 @@ EOF
 if [[ "${SALT_STANDALONE}" == "yes" ]]
 then
     #remove salt-minion service
-    update-rc.d -f salt-minion remove 2>/dev/null
+    update-rc.d -f salt-minion remove 2>/dev/null || systemctl disable salt-minion
     # The salt formulae, pillars, etc are held in an s3 bucket.
     aws --region=eu-west-1 s3 sync "${SALT_S3_PATH}" /srv/
     #add the root dirs to the salt config
@@ -203,7 +146,8 @@ else
     done
 
     # Start salt minion
-    start salt-minion
+    update-rc.f defaults salt-minion || systemctl enable salt-minion
+    start salt-minion || systemctl start salt-minion
 
     # Do not attempt to run the Salt highstate
     # if the Salt Master is not responding.
