@@ -53,7 +53,7 @@ EOF
          --tries=5 \
          --timeout=60 \
          --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-master}master/bin/tags2grains.py
+         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-master}/bin/tags2grains.py
 
     chmod -R +x /etc/salt/reactor/bin/
 
@@ -156,6 +156,6 @@ else
         exit 1
     fi
 
-    # Run highstate
-    salt-call state.highstate || true
+    # Run highstate? the minions ervice should cause the node to auto highstate once it connects to the master.
+    #salt-call state.highstate || true
 fi
