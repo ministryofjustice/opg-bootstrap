@@ -6,6 +6,9 @@ mkdir -p /etc/salt
 ##### salt-master
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
+    #install the salt-master package from the salt repo in the ami
+    apt-get -y update
+    apt-get -y install salt-master
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
 file_roots:
