@@ -69,15 +69,12 @@ then
     fi
 fi
 
-OPG_STACK=$(echo "${OPG_STACK}"| tr -d '[:digit:]')
-
-if [[ "${OPG_STACK}" =~ ^production ]]
-then
-    sed -i "1s/^/PS1=\"\\\[\\\033[01;31m\\\](${OPG_STACK}) \\\u@${OPG_ROLE}:\"\n/" /etc/profile.d/bash-prompt.sh
-else
-    sed -i "1s/^/PS1=\"\\\[\\\033[01;34m\\\](${OPG_STACK}) \\\u@${OPG_ROLE}:\"\n/" /etc/profile.d/bash-prompt.sh
-fi
-
-echo "Install support packages"
-apt-get -y -qq update
-apt-get -y -qq install git awscli
+#add OPG_ variables to /etc/environment to make them available outside of config mgmt
+cat <<EOF >> /etc/environment
+OPG_STACKNAME="${OPG_STACKNAME}"
+OPG_ROLE="${OPG_ROLE}"
+OPG_PROJECT="${OPG_PROJECT}"
+OPG_ENVIRONMENT="${OPG_ENVIRONMENT}"
+OPG_SHARED_SUFFIX="${OPG_SHARED_SUFFIX}"
+OPG_DOMAIN="${OPG_DOMAIN}"
+EOF
