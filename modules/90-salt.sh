@@ -149,7 +149,7 @@ else
     done
 
     # Start salt minion
-    update-rc.d defaults salt-minion || systemctl enable salt-minion
+    update-rc.d salt-minion defaults || systemctl enable salt-minion
     start salt-minion || systemctl start salt-minion
 
     # Do not attempt to run the Salt highstate
