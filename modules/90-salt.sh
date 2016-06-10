@@ -90,8 +90,8 @@ local.cmd.run:
     - '/etc/salt/reactor/bin/tags2grains.py'
 EOF
     fi
-    update-rc.f defaults salt-master || systemctl enable salt-master
-    start salt-master || systemctl start salt-master
+    update-rc.d salt-master defaults || systemctl enable salt-master
+    service salt-master restart
 fi
 
 # salt-minon configuration
