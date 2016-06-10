@@ -150,7 +150,7 @@ else
 
     # Start salt minion
     update-rc.d salt-minion defaults || systemctl enable salt-minion
-    start salt-minion || systemctl start salt-minion
+    service salt-minion restart
 
     # Do not attempt to run the Salt highstate
     # if the Salt Master is not responding.
