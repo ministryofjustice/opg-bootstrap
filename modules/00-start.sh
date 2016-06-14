@@ -11,6 +11,8 @@ echo "Updating hostname"
 IP=$(curl -s "${EC2_METADATA_URL}/local-ipv4")
 echo "${IP} ${HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
 
+#update apt-cache
+apt-get update
 
 # Make sure files are 644 and directories are 755.
 umask 022
