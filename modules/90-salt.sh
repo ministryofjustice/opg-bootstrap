@@ -156,7 +156,6 @@ else
     # if the Salt Master is not responding.
     if (( ${#MASTER_RESPONSES[@]} < 2 )); then
         echo "Unable to contact the Salt Master, Not running highstate"
-        exit 1
     else
         salt-call state.highstate || true
     fi
