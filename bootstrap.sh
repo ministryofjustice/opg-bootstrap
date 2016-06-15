@@ -8,7 +8,7 @@ function download()
     #if you want to use a branch of the bootstrap repo, set the BS_BRANCH variable in userdata
     local module_path="${1}"
     local retry_count_down=30
-    while ! wget --no-verbose --retry-connrefused --random-wait -O "${module_path}" "https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-master}/${module_path}" && [ ${retry_count_down} -gt 0 ] ; do
+    while ! wget --no-verbose --retry-connrefused --random-wait -O "${module_path}" "https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-v0.1.0}/${module_path}" && [ ${retry_count_down} -gt 0 ] ; do
         retry_count_down=$((retry_count_down - 1))
         sleep 10
     done
@@ -28,12 +28,6 @@ function module()
 
 module modules/00-start.sh
 module modules/10-volumes.sh
-if [ "${USE_DOCKER}" == "yes" ]
-then
-    module modules/20-docker.sh
-fi
-if [ "${USE_SALT}" == "yes" ]
-then
-    module modules/90-salt.sh
-fi
+[[ "${USE_DOCKER}" == "no" ]] || module modules/20-docker.sh
+[[ "${USE_SALT}" = "no" ]] || module modules/90-salt.sh
 module modules/99-end.sh
