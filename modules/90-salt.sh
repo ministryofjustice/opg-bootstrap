@@ -3,6 +3,10 @@ set -e
 
 mkdir -p /etc/salt
 
+[[ -f /etc/salt/minion_id ]] && rm -f /etc/salt/minion_id
+[[ -f /etc/salt/pki/minion/minion.pem ]] && rm -f /etc/salt/pki/minion/minion.pem
+[[ -f /etc/salt/pki/minion/minion.pub ]] && rm -f /etc/salt/pki/minion/minion.pub
+
 ##### salt-master
 
 if [  "${IS_SALTMASTER}" == "yes" ]; then
@@ -56,7 +60,7 @@ EOF
          --tries=5 \
          --timeout=60 \
          --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-master}/bin/tags2grains.py
+         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-v0.1.0}/bin/tags2grains.py
 
     chmod -R +x /etc/salt/reactor/bin/
 
@@ -150,6 +154,7 @@ else
 
     # Start salt minion
     update-rc.d salt-minion defaults || systemctl enable salt-minion
+
     service salt-minion restart
 
     # Do not attempt to run the Salt highstate
