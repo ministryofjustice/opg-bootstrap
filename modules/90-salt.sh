@@ -13,6 +13,9 @@ if [  "${IS_SALTMASTER}" == "yes" ]; then
     #install the salt-master package from the salt repo in the ami
     apt-get -y update
     apt-get -y install salt-master salt-api salt-ssh
+    #fix 14.04 issue with upstart and sysv start scripts
+    [[ -f /etc/init/sal-master.conf && -f /etc/init.d/salt-master ]] && echo manual >> /etc/init/salt-master.override
+
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
 file_roots:
