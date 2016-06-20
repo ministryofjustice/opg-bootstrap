@@ -89,8 +89,8 @@ SERVICE_STORAGE_DEVICES_COUNT=${#SERVICE_STORAGE_DEVICES[@]}
 # I/O latency in some cases. Also, set read-ahead
 # value to double the default.
 for d in "${SERVICE_STORAGE_DEVICES[@]}"; do
-    echo 'noop' > /sys/block/${d##*/}/queue/scheduler
-    blockdev --setra 512 $d
+    echo 'noop' > "/sys/block/${d##*/}/queue/scheduler"
+    blockdev --setra 512 "${d}"
 done
 
 
@@ -101,7 +101,7 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
         # Nothing of value should be there in these directories.
         if [[ -d $d ]]; then
             umount -f $d || true
-            rm -rf ${d}/*
+            rm -rf "${d:?}/*"
         else
             mkdir -p $d
         fi
@@ -113,9 +113,9 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
     # Make sure that attached volume really
     # is not mounted anywhere.
     for d in "${SERVICE_STORAGE_DEVICES[@]}"; do
-        if grep -q $d /proc/mounts &>/dev/null; then
+        if grep -q "${d}" /proc/mounts &>/dev/null; then
             # Sort by length, in order to unmount longest path first.
-            grep $d /proc/mounts | awk '{ print length, $2 }' | \
+            grep "${d}" /proc/mounts | awk '{ print length, $2 }' | \
                 sort -gr | cut -d' ' -f2- | xargs umount -f || true
         fi
     done
@@ -166,7 +166,7 @@ if [[ "$SERVICE_STORAGE" == 'yes' ]]; then
     for d in /var/lib/docker /srv/docker; do
         if [[ -d $d ]]; then
             umount -f $d || true
-            rm -rf ${d}/*
+            rm -rf "${d:?}/*"
         else
             mkdir -p $d
         fi

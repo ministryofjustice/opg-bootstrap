@@ -12,7 +12,7 @@ mkdir -p /etc/salt
 if [  "${IS_SALTMASTER}" == "yes" ]; then
     #install the salt-master package from the salt repo in the ami
     apt-get -y update
-    apt-get -y install salt-master
+    apt-get -y install salt-master salt-api salt-ssh
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
 file_roots:
@@ -60,7 +60,7 @@ EOF
          --tries=5 \
          --timeout=60 \
          --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-v0.1.0}/bin/tags2grains.py
+         -O /etc/salt/reactor/bin/tags2grains.py "https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/${BS_BRANCH:-v0.1.0}/bin/tags2grains.py"
 
     chmod -R +x /etc/salt/reactor/bin/
 
@@ -142,7 +142,7 @@ else
 
         for p in 4505 4506; do
             if nc -z -w 3 salt $p &> /dev/null; then
-                MASTER_RESPONSES+=( $p )
+                MASTER_RESPONSES+=( $n )
             fi
         done
 
