@@ -145,8 +145,8 @@ if [[ "$SERVICE_STORAGE" == 'yes' ]]; then
 
     # Create RAID0 if there is more than one device.
     if (( SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
-        mkfs.btrfs -L '/srv' -d raid0 -f \
-            "$(printf '%s ' ${SERVICE_STORAGE_DEVICES[@]})"
+        mkfs.btrfs -L /srv -d raid0 -f \
+            $( IFS=' ' ; echo "${SERVICE_STORAGE_DEVICES[*]}")
     else
         mkfs.btrfs -L '/srv' -f "${DEVICE}"
     fi
