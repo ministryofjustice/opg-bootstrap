@@ -125,8 +125,8 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
 
     # Wipe any old file system signature, just in case.
     for d in "${SERVICE_STORAGE_DEVICES[@]}"; do
-       # wipefs -a "$(wipefs -f &>/dev/null && echo 'f')" "${d}"
-        wipefs -a "${d}"
+       # wipefs -a"$(wipefs -f &>/dev/null && echo 'f')" "${d}"
+        wipefs -a -f ${d}
     done
 fi
 
@@ -136,6 +136,7 @@ fi
 if [[ "$SERVICE_STORAGE" == 'yes' ]]; then
 
     # Make sure to install dependencies if needed.
+    #TODO: move to opg-os-image docker script
     if ! dpkg -s btrfs-tools &>/dev/null; then
         apt-get -y -qq --no-install-recommends install btrfs-tools
     fi
@@ -146,7 +147,7 @@ if [[ "$SERVICE_STORAGE" == 'yes' ]]; then
     # Create RAID0 if there is more than one device.
     if (( SERVICE_STORAGE_DEVICES_COUNT > 1 )); then
         mkfs.btrfs -L '/srv' -d raid0 -f \
-            "$(printf '%s\n' "${SERVICE_STORAGE_DEVICES[@]}")"
+            "$(printf '%s ' ${SERVICE_STORAGE_DEVICES[@]})"
     else
         mkfs.btrfs -L '/srv' -f "${DEVICE}"
     fi
