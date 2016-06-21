@@ -125,8 +125,7 @@ if [[ $SERVICE_STORAGE == 'yes' ]]; then
 
     # Wipe any old file system signature, just in case.
     for d in "${SERVICE_STORAGE_DEVICES[@]}"; do
-       # wipefs -a"$(wipefs -f &>/dev/null && echo 'f')" "${d}"
-        wipefs -a -f ${d}
+       wipefs -a"$(wipefs -f &>/dev/null && echo 'f')" "${d}"
     done
 fi
 
