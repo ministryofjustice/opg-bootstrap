@@ -67,14 +67,12 @@ presence_events: True
 reactor:
   - 'salt/auth':
     - /etc/salt/reactor/auth.sls
-  - 'salt/minion/*/start':
-    - /etc/salt/reactor/minion-start.sls
   - 'salt/custom/*':
     - 'salt://custom-reactors.sls'
 
 EOF
 
-    mkdir -p /etc/salt/reactor/bin
+    mkdir -p /etc/salt/reactor
     cat <<'EOF' >> /etc/salt/reactor/auth.sls
 {# minion failed to authenticate -- remove accepted key #}
 {% if not data['result'] %}
@@ -91,24 +89,6 @@ minion_add:
 {% endif %}
 EOF
 
-    wget --retry-connrefused \
-         --random-wait \
-         --tries=5 \
-         --timeout=60 \
-         --wait=10 \
-         -O /etc/salt/reactor/bin/tags2grains.py https://raw.githubusercontent.com/ministryofjustice/opg-bootstrap/master/bin/tags2grains.py
-
-    chmod -R +x /etc/salt/reactor/bin/
-
-    cat <<'EOF' >> /etc/salt/reactor/minion-start.sls
-{# When minion connects, run test.ping & state.highstate #}
-highstate_run:
-  local.test.ping:
-    - tgt: {{ data['id'] }}
-  local.state.highstate:
-    - tgt: {{ data['id'] }}
-EOF
-
     mkdir -p /srv/reactor/
     cat <<'EOF' >> /srv/reactor/custom-reactors.sls
 {# When a remote highstate is called #}
@@ -120,16 +100,6 @@ start_highstate:
 {% endif %}
 EOF
 
-
-    if [[ -s /etc/salt/reactor/bin/tags2grains.py && -x /etc/salt/reactor/bin/tags2grains.py ]] ; then
-        cat <<'EOF' >> /etc/salt/reactor/minion-start.sls
-local.cmd.run:
-  - name: get ec2 tags
-  - tgt: {{ data['id'] }}
-  - arg:
-    - '/etc/salt/reactor/bin/tags2grains.py'
-EOF
-    fi
 
     start salt-master
 fi
@@ -174,9 +144,12 @@ fi
 cat <<'EOF' >> /etc/salt/minion
 log_level: warning
 log_level_logfile: all
+startup_states: highstate
 EOF
 
 # let's set grains
+AWS_INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+
 cat <<EOF >> /etc/salt/grains
 opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACKNAME}
@@ -187,6 +160,8 @@ opg_environment: ${OPG_ENVIRONMENT}
 opg_account_id: "${OPG_ACCOUNT_ID}"
 opg_shared_suffix: "${OPG_SHARED_SUFFIX}"
 opg_domain: "${OPG_DOMAIN}"
+
+aws_instance_id: "${AWS_INSTANCE_ID}"
 EOF
 
 #start salt minion service when not in standalone mode
@@ -227,13 +202,4 @@ else
     # Start salt minion
     start salt-minion
 
-    # Do not attempt to run the Salt highstate
-    # if the Salt Master is not responding.
-    if (( ${#MASTER_RESPONSES[@]} < 2 )); then
-        echo "Unable to contact the Salt Master, aborting..."
-        exit 1
-    fi
-
-    # Run highstate
-    salt-call state.highstate || true
 fi
