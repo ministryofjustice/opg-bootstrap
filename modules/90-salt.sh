@@ -18,6 +18,7 @@ if [  "${IS_SALTMASTER}" == "yes" ]; then
 
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
+hash_type: sha256
 file_roots:
   base:
     - /srv/salt
