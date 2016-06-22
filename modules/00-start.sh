@@ -6,10 +6,20 @@ export DEBIAN_FRONTEND=noninteractive
 readonly EC2_METADATA_URL='http://169.254.169.254/latest/meta-data'
 
 #Setup hosts file
+# https://aws.amazon.com/premiumsupport/knowledge-center/linux-static-hostname/
 echo "Updating hostname"
 # domain name and resolv.conf ar managed through dhcp
 IP=$(curl -s "${EC2_METADATA_URL}/local-ipv4")
-echo "${IP} ${HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+TRUNC_INSTANCE_ID=$(curl -s "${EC2_METADATA_URL}/instance-id" | sed -e 's/^i-//')
+if [[ -v OPG_ROLE ]]
+then
+  NEW_HOSTNAME=${OPG_ROLE}-${TRUNC_INSTANCE_ID}
+else
+  NEW_HOSTNAME=${TRUNC_INSTANCE_ID}
+fi
+echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+echo "${NEW_HOSTNAME}" > /etc/hostname
+hostname ${NEW_HOSTNAME}
 
 
 # Make sure files are 644 and directories are 755.
