@@ -20,6 +20,7 @@ fi
 echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
 echo "${NEW_HOSTNAME}" > /etc/hostname
 hostname ${NEW_HOSTNAME}
+service rsyslog restart
 
 
 # Make sure files are 644 and directories are 755.
