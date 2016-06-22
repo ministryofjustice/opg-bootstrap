@@ -20,6 +20,7 @@ fi
 echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
 echo "${NEW_HOSTNAME}" > /etc/hostname
 hostname ${NEW_HOSTNAME}
+service rsyslog restart
 
 # Restart rsyslog to pickup new hostname
 service rsyslog restart
