@@ -5,19 +5,21 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 export DEBIAN_FRONTEND=noninteractive
 readonly EC2_METADATA_URL='http://169.254.169.254/latest/meta-data'
 
-########################################################
-# Update hostname
-# resolv.conf is managed via DHCP
-IP=$(curl -s ${EC2_METADATA_URL}/local-ipv4)
-ID=$(curl -s ${EC2_METADATA_URL}/instance-id)
-HOSTNAME="${OPG_ROLE}-${ID}"
-echo "Updating hostname to: ${HOSTNAME}"
-
-echo "${IP} ${HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
-echo $HOSTNAME | tee \
-    /proc/sys/kernel/hostname \
-    /etc/hostname
-hostname -F /etc/hostname
+#Setup hosts file
+# https://aws.amazon.com/premiumsupport/knowledge-center/linux-static-hostname/
+echo "Updating hostname"
+# domain name and resolv.conf ar managed through dhcp
+IP=$(curl -s "${EC2_METADATA_URL}/local-ipv4")
+TRUNC_INSTANCE_ID=$(curl -s "${EC2_METADATA_URL}/instance-id" | sed -e 's/^i-//')
+if [[ -v OPG_ROLE ]]
+then
+  NEW_HOSTNAME=${OPG_ROLE}-${TRUNC_INSTANCE_ID}
+else
+  NEW_HOSTNAME=${TRUNC_INSTANCE_ID}
+fi
+echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+echo "${NEW_HOSTNAME}" > /etc/hostname
+hostname ${NEW_HOSTNAME}
 
 # Restart rsyslog to pickup new hostname
 service rsyslog restart
