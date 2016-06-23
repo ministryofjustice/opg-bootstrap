@@ -69,7 +69,7 @@ start_highstate:
 EOF
 
 
-    update-rc.f defaults salt-master || systemctl enable salt-master
+    update-rc.d defaults salt-master || systemctl enable salt-master
     start salt-master || systemctl start salt-master
 fi
 
