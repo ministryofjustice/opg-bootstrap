@@ -81,7 +81,7 @@ startup_states: highstate
 EOF
 
 # let's set grains
-AWS_INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+AWS_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 
 cat <<EOF >> /etc/salt/grains
 opg_role: ${OPG_ROLE}
@@ -113,27 +113,7 @@ file_roots:
 EOF
     salt-call --local state.highstate
 else
-    # Check whether there is a connectivity with the
-    # Salt Master by checking both ports on which it
-    # should listen (4505 and 4506).
-    for n in {1..10}; do
-        MASTER_RESPONSES=()
-
-        for p in 4505 4506; do
-            if nc -z -w 3 salt $p &> /dev/null; then
-                MASTER_RESPONSES+=( $p )
-            fi
-        done
-
-        # Break from loop if both ports responding
-        (( ${#MASTER_RESPONSES[@]} >= 2 )) && break
-
-        sleep 1
-    done
-
     # Start salt minion
     update-rc.d salt-minion defaults || systemctl enable salt-minion
-
     service salt-minion restart
-
 fi
