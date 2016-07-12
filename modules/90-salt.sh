@@ -15,7 +15,7 @@ if [  "${IS_SALTMASTER}" == "yes" ]; then
     apt-get -y install salt-master salt-api salt-ssh
     service salt-master stop
     #fix 14.04 issue with upstart and sysv start scripts
-    [[ -f /etc/init/sal-master.conf && -f /etc/init.d/salt-master ]] && echo manual >> /etc/init/salt-master.override
+    [[ -f /etc/init/salt-master.conf && -f /etc/init.d/salt-master ]] && echo manual >> /etc/init/salt-master.override
 
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
