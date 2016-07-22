@@ -50,6 +50,6 @@ build:
 showvars:
 	@echo "============================"
 	@echo "cleanup: $(cleanup)"
-	@echo "subnet_id: $(subnet_id)"
+	@echo "subnet_id: $(SUBNET_ID)"
 	@echo "git_branch: $(git_branch)"
 	@echo "============================"
