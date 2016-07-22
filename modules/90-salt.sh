@@ -69,13 +69,15 @@ start_highstate:
 {% endif %}
 EOF
 
-
     update-rc.d salt-master defaults || systemctl enable salt-master
     start salt-master || systemctl start salt-master
 fi
 
 # salt-minon configuration
-cat <<'EOF' >> /etc/salt/minion
+cat <<EOF > /etc/salt/minion
+pillarenv: ${OPG_STACKNAME}
+tcp_keepalive: True
+tcp_keepalive_idle: 300
 log_level: warning
 log_level_logfile: all
 startup_states: highstate
