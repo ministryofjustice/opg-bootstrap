@@ -34,7 +34,7 @@ for b in /sys/class/scsi_host/*/scan; do
 done
 
 echo Refreshing partition table for each block device.
-for b in $(lsblk -dno NAME | awk '!/(sr.*|mapper)/ { print $1 }'); do
+for b in $(lsblk -dno NAME | awk '!/(sr.*|mapper|loop)/ { print $1 }'); do
     echo "Refreshing: ${b}"
     sfdisk -R "/dev/${b}" 2> /dev/null || true
 done
