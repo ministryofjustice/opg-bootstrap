@@ -91,7 +91,7 @@ EOF
 
 #update dhcp settings to include stack search domain
 
-if grep -q "prepend domain-name" /etc/dhcp/dhclient.conf
+if grep -q "^prepend domain-name" /etc/dhcp/dhclient.conf
 then
     sed -i 's/^prepend domain-name.*/prepend domain-name " '${OPG_STACKNAME}'.internal "/' /etc/dhcp/dhclient.conf
 else
