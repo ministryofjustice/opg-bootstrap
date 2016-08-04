@@ -90,3 +90,16 @@ OPG_ENV="${OPG_STACKNAME}"
 OPG_SHARED_SUFFIX="${OPG_SHARED_SUFFIX}"
 OPG_DOMAIN="${OPG_DOMAIN}"
 EOF
+
+#update dhcp settings to include stack search domain
+
+if grep -q "prepend domain-name" /etc/dhcp/dhclient.conf
+then
+    sed -i 's/^prepend domain-name.*/prepend domain-name " '${OPG_STACKNAME}'.internal "/' /etc/dhcp/dhclient.conf
+else
+    echo prepend domain-name " ${OPG_STACKNAME}.internal " >> /etc/dhcp/dhclient.conf
+fi
+
+#make runtime change to affect above config
+sed -i 's/^search/search '${OPG_STACKNAME}'.internal/' /etc/resolv.conf
+
