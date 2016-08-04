@@ -41,6 +41,15 @@ class BootstrapTest(object):
         pillar_env = stack_name.split(':')
         return opg_stack[1] == pillar_env[1]
 
+    def has_resolvconf_search_domain(self, stackname):
+        with open('/etc/resolv.conf', 'r') as f:
+            resolvconf = "{}".format("".join([s for s in f.readlines() if 'search' in s]))
+        return stackname in resolvconf
+
+    def has_dhclient_search_domain(self, stackname):
+        with open('/etc/dhcp/dhclient.conf', 'r') as f:
+            dhclient_conf = "{}".format("".join([s for s in f.readlines() if 'prepend' in s]))
+        return stackname in dhclient_conf
 
     def complete(self):
         """
@@ -91,9 +100,11 @@ if __name__ == "__main__":
     if boot.complete():
         boot.check_services()
         print boot.service_state
-        if not 'failed' in boot.service_state.itervalues():
+        if 'failed' not in boot.service_state.itervalues():
             MSG = "Bootstrap complete"
         else:
             print "{}\n".format(boot.error)
     assert boot.has_pillarenv()
+    assert boot.has_resolvconf_search_domain('test.internal')
+    assert boot.has_dhclient_search_domain('test.internal')
     print "{}\n".format(MSG)
