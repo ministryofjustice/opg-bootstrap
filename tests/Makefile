@@ -1,7 +1,7 @@
 .PHONY: check test clean all build showvars
 shellcheck := $(shell which shellcheck)
 git_branch := $(shell git branch | awk '/^\*/ {print $$2}')
-cleanup =? no
+cleanup ?= no
 
 check:
 ifneq ($(shellcheck),)
@@ -20,7 +20,7 @@ test:
 	pip install -r requirements.txt; \
 	pip freeze; \
 	virtenv/bin/ansible-playbook -i hosts site.yml  --syntax-check; \
-	virtenv/bin/ansible-playbook -i hosts site.yml -vvv -e "subnet_id=${SUBNET_ID} cleanup='$(cleanup)' git_branch=$(git_branch)"  --check; \
+	virtenv/bin/ansible-playbook -i hosts site.yml -vv -e "subnet_id=${SUBNET_ID} cleanup='$(cleanup)' git_branch=$(git_branch)"  --check; \
 	)
 debug:
 	@echo Setup virtualenv
