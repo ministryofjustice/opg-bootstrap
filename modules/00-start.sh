@@ -95,9 +95,9 @@ EOF
 
 if grep -q "^prepend domain-name" /etc/dhcp/dhclient.conf
 then
-    sed -i 's/^prepend domain-name.*/prepend domain-name " '${OPG_STACKNAME}'.internal "/' /etc/dhcp/dhclient.conf
+    sed -i 's/^prepend domain-name.*/prepend domain-name " '${OPG_STACKNAME}'.internal ;"/' /etc/dhcp/dhclient.conf
 else
-    echo prepend domain-name " ${OPG_STACKNAME}.internal " >> /etc/dhcp/dhclient.conf
+    echo "prepend domain-name  \"${OPG_STACKNAME}.internal \";" >> /etc/dhcp/dhclient.conf
 fi
 
 #make runtime change to affect above config
