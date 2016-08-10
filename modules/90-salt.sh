@@ -119,6 +119,7 @@ else
     #make sysv scripts link to upstart
     rm -f /etc/init.d/salt-minion
     ln -s /etc/init/salt-minion.conf /etc/init.d/salt-minion
+    rm -f /etc/init/salt-minion.override
     update-rc.d salt-minion defaults || systemctl enable salt-minion
     service salt-minion restart
 fi
