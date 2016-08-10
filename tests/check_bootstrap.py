@@ -12,7 +12,7 @@
 import os
 import sys
 import subprocess
-
+import re
 
 class BootstrapTest(object):
 
@@ -48,7 +48,7 @@ class BootstrapTest(object):
 
     def has_dhclient_search_domain(self, stackname):
         with open('/etc/dhcp/dhclient.conf', 'r') as f:
-            dhclient_conf = "{}".format("".join([s for s in f.readlines() if 'prepend' in s]))
+            dhclient_conf = "{}".format("".join([s for s in f.readlines() if re.match('^prepend domain-name .*;$', s) is not None]))
         return stackname in dhclient_conf
 
     def complete(self):
