@@ -101,5 +101,6 @@ else
 fi
 
 #make runtime change to affect above config
-sed -i 's/^search/search '${OPG_STACKNAME}'.internal/' /etc/resolv.conf
+ifdown eth0 && ifup eth0
+#sed -i 's/^search/search '${OPG_STACKNAME}'.internal/' /etc/resolv.conf
 

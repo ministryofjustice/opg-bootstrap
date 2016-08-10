@@ -14,8 +14,6 @@ if [  "${IS_SALTMASTER}" == "yes" ]; then
     apt-get -y update
     apt-get -y install salt-master salt-api salt-ssh
     service salt-master stop
-    #fix 14.04 issue with upstart and sysv start scripts
-    [[ -f /etc/init/salt-master.conf && -f /etc/init.d/salt-master ]] && echo manual >> /etc/init/salt-master.override
 
     cat <<'EOF' >> /etc/salt/master
 auto_accept: True
@@ -69,6 +67,9 @@ start_highstate:
 {% endif %}
 EOF
 
+    #make sysv scripts link to upstart
+    rm -f /etc/init.d/salt-master
+    ln -s /etc/init/salt-master.conf /etc/init.d/salt-master
     update-rc.d salt-master defaults || systemctl enable salt-master
     start salt-master || systemctl start salt-master
 fi
@@ -115,6 +116,9 @@ EOF
     salt-call --local state.highstate
 else
     # Start salt minion
+    #make sysv scripts link to upstart
+    rm -f /etc/init.d/salt-minion
+    ln -s /etc/init/salt-minion.conf /etc/init.d/salt-minion
     update-rc.d salt-minion defaults || systemctl enable salt-minion
     service salt-minion restart
 fi
