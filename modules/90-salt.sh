@@ -91,7 +91,6 @@ cat <<EOF >> /etc/salt/grains
 opg_role: ${OPG_ROLE}
 opg_stackname: ${OPG_STACKNAME}
 opg_project: ${OPG_PROJECT}
-opg_stack: "${OPG_STACK}"
 
 opg_environment: ${OPG_ENVIRONMENT}
 opg_account_id: "${OPG_ACCOUNT_ID}"
