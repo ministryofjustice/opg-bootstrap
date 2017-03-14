@@ -26,7 +26,7 @@ configuration
 - ~~DOCKER_COMPOSE_VERSION - what docker compose version to install (will install latest version if not set)~~ #deprecated as it is installed in the AMI
 - DOCKER_NFS_DATA - use nfs to persist container data.
 - OPG_ROLE - sets opg-role grain to this value (to be deprecated in favour to aws tags)
-- OPG_STACK - sets opg-stack grain to this value
+- ~~OPG_STACK - sets opg-stack grain to this value~~ replaced by OPG_STACKNAME
 
 attached volume
 ===============
