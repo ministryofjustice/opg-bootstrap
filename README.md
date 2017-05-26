@@ -18,15 +18,15 @@ configuration
 - USE_SALT - whether to install salt
 - SALT_STANDALONE - configure to run without salt master
 - IS_SALTMASTER - is host a salt master or minion
-- SALT_VERSION - what salt version to install
+- ~~SALT_VERSION - what salt version to install~~ #deprecated as it is installed in the AMI
 - SALT_S3_PATH - The s3 path for masterless salt operation
 - HAS_DATA_STORAGE - have you attached ebs volume?
 - USE_DOCKER - whether to install docker
-- DOCKER_ENGINE_VERSION - docker engine version to install (will install latest version if not set)
-- DOCKER_COMPOSE_VERSION - what docker compose version to install (will install latest version if not set)
+- ~~DOCKER_ENGINE_VERSION - docker engine version to install (will install latest version if not set)~~ #deprecated as it is installed in the AMI
+- ~~DOCKER_COMPOSE_VERSION - what docker compose version to install (will install latest version if not set)~~ #deprecated as it is installed in the AMI
 - DOCKER_NFS_DATA - use nfs to persist container data.
 - OPG_ROLE - sets opg-role grain to this value (to be deprecated in favour to aws tags)
-- OPG_STACK - sets opg-stack grain to this value
+- ~~OPG_STACK - sets opg-stack grain to this value~~ replaced by OPG_STACKNAME
 
 attached volume
 ===============
@@ -96,6 +96,9 @@ That way you can alter your user_data script and i.e. remove salt part, or docke
 
 `bootstrap.sh` is only an example of user_data script. 
 
+testing
+=======
+Check testing [Readme](tests/Readme.md)
 
 todo
 ====
