@@ -119,6 +119,8 @@ else
     # Start salt minion
     #make sysv scripts link to upstart
     rm -f /etc/init.d/salt-minion
+    # to stop insserv: script salt-minion is not an executable regular file, skipped! on 16.04
+    chmod +x /etc/init/salt-minion.conf
     ln -s /etc/init/salt-minion.conf /etc/init.d/salt-minion
     rm -f /etc/init/salt-minion.override
     update-rc.d salt-minion defaults || systemctl enable salt-minion
