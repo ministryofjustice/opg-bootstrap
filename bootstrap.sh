@@ -28,6 +28,6 @@ function module()
 
 module modules/00-start.sh
 module modules/10-volumes.sh
-[[ "${USE_DOCKER}" == "no" ]] || module modules/20-docker.sh
-[[ "${USE_SALT}" = "no" ]] || module modules/90-salt.sh
+#[[ "${USE_DOCKER}" == "no" ]] || module modules/20-docker.sh
+#[[ "${USE_SALT}" = "no" ]] || module modules/90-salt.sh
 module modules/99-end.sh
