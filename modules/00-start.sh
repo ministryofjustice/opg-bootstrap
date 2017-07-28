@@ -103,6 +103,9 @@ apt-get -y -qq update
 apt-get -y -qq install joe git awscli
 
 
-# SET MTU to 1500
+if [[ "${OPG_ROLE}" == "frontend" ]]
+then
+# SET frontend MTU to 1500
 # As required by ATOS
 ip link set dev eth0 mtu 1500
+fi
