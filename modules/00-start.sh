@@ -101,3 +101,8 @@ fi
 echo "Install support packages"
 apt-get -y -qq update
 apt-get -y -qq install joe git awscli
+
+
+# SET MTU to 1500
+# As required by ATOS
+ip link set dev eth0 mtu 1500
