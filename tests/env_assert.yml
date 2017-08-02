@@ -1,5 +1,0 @@
----
-- assert:
-    that: "{{ lookup('env', item) | count }} > 0"
-  with_items:
-    - SUBNET_ID
