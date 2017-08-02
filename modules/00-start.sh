@@ -98,7 +98,15 @@ else
     echo "prepend domain-name  \"${OPG_STACKNAME}.internal \";" >> /etc/dhcp/dhclient.conf
 fi
 
+
 #make runtime change to affect above config
 ifdown eth0 && ifup eth0
 #sed -i 's/^search/search '${OPG_STACKNAME}'.internal/' /etc/resolv.conf
+
+if [ -n "${ETH0_MTU}" ]; then
+# set MTU if variable is defined
+	ip link set dev eth0 mtu ${ETH0_MTU}
+fi
+
+
 
