@@ -28,10 +28,13 @@ sed -i -e \
     /etc/fstab
 
 
-echo Scaning SCSI bus to look for new devices
-for b in /sys/class/scsi_host/*/scan; do
-    echo '- - -' > "${b}"
-done
+if [ "$(ls -A /sys/class/scsi_host)" ];
+then
+    echo Scaning SCSI bus to look for new devices
+    for b in /sys/class/scsi_host/*/scan; do
+        echo '- - -' > "${b}"
+    done
+fi
 
 echo Refreshing partition table for each block device.
 for b in $(lsblk -dno NAME | awk '!/(sr.*|mapper|loop)/ { print $1 }'); do
