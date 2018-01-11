@@ -17,9 +17,14 @@ then
 else
   NEW_HOSTNAME=${TRUNC_INSTANCE_ID}
 fi
-echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
-echo "${NEW_HOSTNAME}" > /etc/hostname
-hostname ${NEW_HOSTNAME}
+
+HOST_STRING="${IP} ${NEW_HOSTNAME} ${OPG_ROLE}"
+if grep -q "^${HOST_STRING}" /etc/hosts
+then
+    echo "${HOST_STRING}" >> /etc/hosts
+    echo "${NEW_HOSTNAME}" > /etc/hostname
+    hostname ${NEW_HOSTNAME}
+fi
 service rsyslog restart
 
 #update apt-cache
