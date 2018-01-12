@@ -20,7 +20,7 @@ fi
 
 HOST_STRING="${IP} ${NEW_HOSTNAME} ${OPG_ROLE}"
 # Remove our host string if it exists in the hosts file, this causes a failure in resolvd if declared more than once
-sed '/${TRUNC_INSTANCE_ID}/d' /etc/hosts
+sed -i '/${TRUNC_INSTANCE_ID}/d' /etc/hosts
 
 echo "${HOST_STRING}" >> /etc/hosts
 echo "${NEW_HOSTNAME}" > /etc/hostname
