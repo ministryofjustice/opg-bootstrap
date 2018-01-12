@@ -17,9 +17,15 @@ then
 else
   NEW_HOSTNAME=${TRUNC_INSTANCE_ID}
 fi
-echo "${IP} ${NEW_HOSTNAME} ${OPG_ROLE}" >> /etc/hosts
+
+HOST_STRING="${IP} ${NEW_HOSTNAME} ${OPG_ROLE}"
+# Remove our host string if it exists in the hosts file, this causes a failure in resolvd if declared more than once
+sed '/${TRUNC_INSTANCE_ID}/d' /etc/hosts
+
+echo "${HOST_STRING}" >> /etc/hosts
 echo "${NEW_HOSTNAME}" > /etc/hostname
 hostname ${NEW_HOSTNAME}
+
 service rsyslog restart
 
 #update apt-cache
