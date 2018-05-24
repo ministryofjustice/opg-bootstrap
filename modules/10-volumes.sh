@@ -68,7 +68,7 @@ for d in "${EPHEMERALS[@]}"; do
         # the account different naming scheme
         # e.g., /dev/sdb vs /dev/xvdb, etc.
         if [[ ! -b /dev/${DEVICE} ]]; then
-            DEVICE="${DEVICE/sd/xvd}"
+            DEVICE="${DEVICE/sd/xvd/nvme}"
             [[ -b /dev/${DEVICE} ]] || continue
         fi
     fi
