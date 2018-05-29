@@ -221,7 +221,7 @@ if [[ $HAS_DATA_STORAGE == 'yes' ]]; then
             break
         fi
 
-        for d in /dev/{xvdh,sdh}; do
+        for d in /dev/{xvdh,sdh,sdf}; do
             if [[ -b $d ]]; then
                 DATA_STORAGE='yes'
                 DATA_STORAGE_DEVICE="${d}"
