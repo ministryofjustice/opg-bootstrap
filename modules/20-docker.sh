@@ -5,4 +5,4 @@ then
     echo "DOCKER_OPTS=\"\${DOCKER_OPTS} -s btrfs\"" >> /etc/default/docker
 fi
 
-service docker restart
+service docker restart || true
