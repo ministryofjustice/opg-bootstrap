@@ -28,9 +28,6 @@ hostname ${NEW_HOSTNAME}
 
 service rsyslog restart
 
-#update apt-cache
-apt-get update
-
 # Make sure files are 644 and directories are 755.
 umask 022
 
